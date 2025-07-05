@@ -1,4 +1,6 @@
 #pragma once
+
+#include "Link.h"
 #include "Node.h"
 #include "Packet.h"
 
@@ -8,16 +10,19 @@ struct Event {
   enum class EventType {
     PACKET_GENERATION,
     PACKET_ARRIVAL,
-    PACKET_DEPARTURE,
+    TRANSMISSION_COMPLETE,
   };
 
-  double event_time;
   EventType event_type;
+  double event_time;
 
   std::shared_ptr<Node> target_node;
+  std::shared_ptr<Link> target_link;
   std::shared_ptr<Packet> associated_packet;
 
-  Event(double time, EventType type) : event_time(time), event_type(type) {};
+  Event(EventType type, double time, std::shared_ptr<Node> node = nullptr,
+        std::shared_ptr<Link> link = nullptr,
+        std::shared_ptr<Packet> packet = nullptr);
 };
 
 struct EventComparator {

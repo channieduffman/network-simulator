@@ -2,10 +2,19 @@
 
 class Packet {
 private:
-  double size_in_bytes;
+  static constexpr double DEFAULT_SIZE_IN_BITS = 12000;
+
+  int source_address;
+  int destination_address;
+  double time_created_in_seconds;
+  double size_in_bits;
 
 public:
-  Packet();
+  Packet(int source, int destination, double created,
+         double size = DEFAULT_SIZE_IN_BITS);
 
-  double getSizeInBytes() const;
+  int getSourceAddress() const;
+  int getDestinationAddress() const;
+  double getSizeInBits() const;
+  double getTimeCreatedInSeconds() const;
 };

@@ -16,10 +16,8 @@ private:
   double current_time;
   double simulation_end_time;
   std::priority_queue<Event, std::vector<Event>, EventComparator> event_queue;
-
   std::map<int, std::shared_ptr<Node>> all_nodes;
   std::vector<int> all_node_addresses;
-
   std::vector<std::shared_ptr<Link>> all_links;
 
   void processEvent(const Event &event);
