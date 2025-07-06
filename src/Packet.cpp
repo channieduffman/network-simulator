@@ -20,8 +20,7 @@ double Packet::getTimeCreatedInSeconds() const {
   return time_created_in_seconds;
 }
 
-void Packet::printPacket() const {
-  std::cout << "Source: " << std::to_string(source_address)
-            << ", Destination: " << std::to_string(destination_address)
-            << std::endl;
+std::string Packet::getPacketString() const {
+  return "{" + std::to_string(source_address) + ":" +
+         std::to_string(destination_address) + "}";
 }

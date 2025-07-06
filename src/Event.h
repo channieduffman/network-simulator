@@ -20,7 +20,7 @@ struct Event {
   std::shared_ptr<Link> target_link;
   std::shared_ptr<Packet> associated_packet;
 
-  std::string getTypeString();
+  std::string getTypeString() const;
 
   Event(EventType type, double time, std::shared_ptr<Node> node = nullptr,
         std::shared_ptr<Link> link = nullptr,

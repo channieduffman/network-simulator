@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 class Packet {
 private:
   static constexpr double DEFAULT_SIZE_IN_BITS = 12000;
@@ -18,5 +20,5 @@ public:
   double getSizeInBits() const;
   double getTimeCreatedInSeconds() const;
 
-  void printPacket() const;
+  std::string getPacketString() const;
 };

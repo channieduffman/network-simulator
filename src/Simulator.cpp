@@ -1,5 +1,6 @@
 #include "Simulator.h"
 
+#include <iomanip>
 #include <iostream>
 #include <memory>
 
@@ -31,11 +32,28 @@ void Simulator::processEvent(const Event &event) {
     handleTransmissionComplete(event);
     break;
   }
+
+  /*std::cout << "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;*/
+
+  //  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 void Simulator::handlePacketGeneration(const Event &event) {
   std::shared_ptr<Node> node = event.target_node;
-  node->generatePacket();
+  switch (node->getAddress()) {
+  case 0:
+    node->generatePacket(1);
+    break;
+  case 1:
+    node->generatePacket(2);
+    break;
+  case 2:
+    node->generatePacket(3);
+    break;
+  case 3:
+    node->generatePacket(0);
+    break;
+  }
 }
 
 void Simulator::handlePacketArrival(const Event &event) {
@@ -61,8 +79,6 @@ void Simulator::addNode(std::shared_ptr<Node> node) {
 
 void Simulator::addLink(std::shared_ptr<Link> link) {
   assert(link != nullptr && "error: Simulator::addLink(): link is null!");
-  std::cout << "adding link: " << std::to_string(link->getSourceNode()) << "->"
-            << std::to_string(link->getDestinationNode()) << std::endl;
   all_links.push_back(link);
 }
 
@@ -73,23 +89,25 @@ void Simulator::setup() {
      * Allow for variable topologies
      * Implement a simple protocol
      */
+
+    std::cout << "here we are in setup()" << std::endl;
     std::shared_ptr<Node> node0 = std::make_shared<Node>(0, shared_from_this());
     std::shared_ptr<Node> node1 = std::make_shared<Node>(1, shared_from_this());
     std::shared_ptr<Node> node2 = std::make_shared<Node>(2, shared_from_this());
     std::shared_ptr<Node> node3 = std::make_shared<Node>(3, shared_from_this());
 
     std::shared_ptr<Link> link01 =
-        std::make_shared<Link>(node0, node1, 1, 100, shared_from_this());
+        std::make_shared<Link>(node0, node1, 10, 40, shared_from_this());
     std::shared_ptr<Link> link10 =
-        std::make_shared<Link>(node1, node0, 1, 100, shared_from_this());
+        std::make_shared<Link>(node1, node0, 10, 40, shared_from_this());
     std::shared_ptr<Link> link12 =
-        std::make_shared<Link>(node1, node2, 1, 500, shared_from_this());
+        std::make_shared<Link>(node1, node2, 10, 20, shared_from_this());
     std::shared_ptr<Link> link21 =
-        std::make_shared<Link>(node2, node1, 1, 500, shared_from_this());
+        std::make_shared<Link>(node2, node1, 10, 20, shared_from_this());
     std::shared_ptr<Link> link23 =
-        std::make_shared<Link>(node2, node3, 1, 900, shared_from_this());
+        std::make_shared<Link>(node2, node3, 10, 50, shared_from_this());
     std::shared_ptr<Link> link32 =
-        std::make_shared<Link>(node3, node2, 1, 900, shared_from_this());
+        std::make_shared<Link>(node3, node2, 10, 50, shared_from_this());
 
     node0->addOutgoingLink(link01);
 
@@ -129,17 +147,20 @@ void Simulator::setup() {
     addLink(link23);
     addLink(link32);
 
-    for (auto link : all_links) {
-      link->printLink();
-    }
+    packets_received_by_node.insert({node0->getAddress(), 0});
+    packets_received_by_node.insert({node1->getAddress(), 0});
+    packets_received_by_node.insert({node2->getAddress(), 0});
+    packets_received_by_node.insert({node3->getAddress(), 0});
 
-    for (const auto &pair : node0->getRoutes()) {
-      std::cout << pair.first << ", ";
-      pair.second->printLink();
-    }
+    packets_dropped_by_node.insert({node0->getAddress(), 0});
+    packets_dropped_by_node.insert({node1->getAddress(), 0});
+    packets_dropped_by_node.insert({node2->getAddress(), 0});
+    packets_dropped_by_node.insert({node3->getAddress(), 0});
 
-    node0->generatePacket(node3->getAddress(), 0.5);
-    node1->generatePacket(node2->getAddress(), 0.2);
+    node0->generatePacket(node3->getAddress(), 0.00002);
+    node1->generatePacket(node2->getAddress(), 0.00002);
+    node2->generatePacket(node0->getAddress(), 0.00002);
+    node3->generatePacket(node1->getAddress(), 0.00002);
 
   } catch (const std::exception &e) {
     std::cout << "error: " << e.what() << std::endl;
@@ -147,16 +168,12 @@ void Simulator::setup() {
 }
 
 void Simulator::run() {
-  std::cout << "Simulation started: " << current_time << " --- " << std::endl;
   while (!event_queue.empty() && current_time < simulation_end_time) {
     Event next_event = event_queue.top();
     event_queue.pop();
     current_time = next_event.event_time;
-    std::cout << "Processing " << next_event.getTypeString() << " at "
-              << current_time << std::endl;
     processEvent(next_event);
   }
-  std::cout << "Simulation ended: " << current_time << " --- " << std::endl;
 }
 
 void Simulator::scheduleEvent(const Event &event) { event_queue.push(event); }
@@ -176,15 +193,28 @@ const std::vector<int> &Simulator::getAllNodeAddresses() const {
 }
 
 void Simulator::printReport() const {
-  int total_packets_received = 0;
-  int total_packets_dropped = 0;
-  for (auto node : all_nodes) {
-    total_packets_received += node.second->getPacketsReceived();
-    total_packets_dropped += node.second->getPacketsDropped();
-  }
+  std::cout << "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
+  std::cout << "Summary" << std::endl;
+  std::cout << "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
 
-  std::cout << "Packets Delivered:\t" << total_packets_received << std::endl;
-  std::cout << "Packets Dropped:\t" << total_packets_dropped << std::endl;
-  std::cout << "==================================" << std::endl;
-  std::cout << "In " << current_time << " seconds." << std::endl;
+  for (auto node : all_node_addresses) {
+    std::cout << "--- Node " << node << std::endl;
+    std::cout << std::setw(20) << std::left
+              << "Packets Received:" << packets_received_by_node.at(node)
+              << std::endl;
+    std::cout << std::setw(20) << std::left
+              << "Packets Dropped:" << packets_dropped_by_node.at(node)
+              << std::endl;
+    std::cout << "--------------------------------------------" << std::endl;
+  }
+}
+
+void Simulator::addPacketReceived(std::shared_ptr<Node> node) {
+  int addr = node->getAddress();
+  packets_received_by_node[addr]++;
+}
+
+void Simulator::addPacketDropped(std::shared_ptr<Node> node) {
+  int addr = node->getAddress();
+  packets_dropped_by_node[addr]++;
 }

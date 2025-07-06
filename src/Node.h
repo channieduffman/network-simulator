@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <queue>
+#include <random>
 #include <vector>
 
 class Simulator;
@@ -23,14 +24,16 @@ private:
 
   std::map<int, std::shared_ptr<Link>> routes;
 
+  std::mt19937 random_engine;
+
   std::weak_ptr<Simulator> simulator;
 
-  int getRandomIndex(int len);
+  int getRandomAddress(int source_address);
 
 public:
-  Node(int address, std::shared_ptr<Simulator> sim, int capacity = 10);
+  Node(int address, std::shared_ptr<Simulator> sim, int capacity = 3);
 
-  void generatePacket(int target = -1, double interval = 0.2);
+  void generatePacket(int target = -1, double interval = 0.02);
   void receivePacket(std::shared_ptr<Packet> packet);
   void notifyLinkFree(std::shared_ptr<Link> free_link);
   void processQueuedPacket();

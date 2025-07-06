@@ -36,4 +36,5 @@ public:
   void completeTransmission(std::shared_ptr<Packet> packet);
 
   void printLink() const;
+  std::string getLinkString() const;
 };

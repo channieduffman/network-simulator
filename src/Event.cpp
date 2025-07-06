@@ -11,7 +11,7 @@ Event::Event(EventType type, double time, std::shared_ptr<Node> node,
   associated_packet = packet;
 }
 
-std::string Event::getTypeString() {
+std::string Event::getTypeString() const {
   std::string repr;
   switch (event_type) {
   case Event::EventType::PACKET_GENERATION:

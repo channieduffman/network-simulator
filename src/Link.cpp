@@ -33,9 +33,10 @@ void Link::startTransmission(std::shared_ptr<Packet> packet) {
   double transmission_delay = getTransmissionDelayInSeconds(packet);
 
   if (auto sim = simulator.lock()) {
-    Event next_event(Event::EventType::TRANSMISSION_COMPLETE,
-                     sim->getCurrentTime() + transmission_delay, nullptr,
-                     shared_from_this(), packet);
+
+    double total_time = transmission_delay + sim->getCurrentTime();
+    Event next_event(Event::EventType::TRANSMISSION_COMPLETE, total_time,
+                     nullptr, shared_from_this(), packet);
     sim->scheduleEvent(next_event);
   } else {
     throw std::runtime_error(
@@ -84,4 +85,11 @@ double Link::getPropagationDelayInSeconds() const {
 void Link::printLink() const {
   std::cout << std::to_string(source_node->getAddress()) << " -> "
             << std::to_string(destination_node->getAddress()) << std::endl;
+}
+
+std::string Link::getLinkString() const {
+  std::string src = std::to_string(source_node->getAddress());
+  std::string dst = std::to_string(destination_node->getAddress());
+
+  return src + ":" + dst;
 }

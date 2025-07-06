@@ -20,6 +20,9 @@ private:
   std::vector<int> all_node_addresses;
   std::vector<std::shared_ptr<Link>> all_links;
 
+  std::map<int, int> packets_received_by_node;
+  std::map<int, int> packets_dropped_by_node;
+
   void processEvent(const Event &event);
   void handlePacketGeneration(const Event &event);
   void handlePacketArrival(const Event &event);
@@ -40,6 +43,9 @@ public:
   double getCurrentTime() const;
   std::shared_ptr<Node> getNodeAtAddress(int address);
   const std::vector<int> &getAllNodeAddresses() const;
+
+  void addPacketReceived(std::shared_ptr<Node> node);
+  void addPacketDropped(std::shared_ptr<Node> node);
 
   void printReport() const;
 };
