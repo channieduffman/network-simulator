@@ -28,7 +28,7 @@ private:
   int getRandomIndex(int len);
 
 public:
-  Node(int address, std::shared_ptr<Simulator> sim, int capacity = 20);
+  Node(int address, std::shared_ptr<Simulator> sim, int capacity = 10);
 
   void generatePacket(int target = -1, double interval = 0.2);
   void receivePacket(std::shared_ptr<Packet> packet);

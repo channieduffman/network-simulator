@@ -56,7 +56,7 @@ void Simulator::addNode(std::shared_ptr<Node> node) {
     throw std::runtime_error("error: Simulator::addNode(): duplicate key `" +
                              std::to_string(address) + "`!");
   }
-  std::cout << "inserting: " << std::to_string(address) << std::endl;
+  all_node_addresses.push_back(address);
 }
 
 void Simulator::addLink(std::shared_ptr<Link> link) {
@@ -138,8 +138,8 @@ void Simulator::setup() {
       pair.second->printLink();
     }
 
-    node0->generatePacket(node3->getAddress());
-    node1->generatePacket(node2->getAddress());
+    node0->generatePacket(node3->getAddress(), 0.5);
+    node1->generatePacket(node2->getAddress(), 0.2);
 
   } catch (const std::exception &e) {
     std::cout << "error: " << e.what() << std::endl;

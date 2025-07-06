@@ -8,7 +8,7 @@
 
 class Simulator;
 
-class Link : std::enable_shared_from_this<Link> {
+class Link : public std::enable_shared_from_this<Link> {
 private:
   std::shared_ptr<Node> source_node;
   std::shared_ptr<Node> destination_node;
