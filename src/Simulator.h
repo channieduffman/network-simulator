@@ -15,6 +15,7 @@ private:
 
   double current_time;
   double simulation_end_time;
+
   std::priority_queue<Event, std::vector<Event>, EventComparator> event_queue;
   std::map<int, std::shared_ptr<Node>> all_nodes;
   std::vector<int> all_node_addresses;
@@ -34,18 +35,16 @@ public:
 
   void addNode(std::shared_ptr<Node> node);
   void addLink(std::shared_ptr<Link> link);
-  void setup();
-
-  void run();
-
-  void scheduleEvent(const Event &event);
+  void addPacketReceived(std::shared_ptr<Node> node);
+  void addPacketDropped(std::shared_ptr<Node> node);
 
   double getCurrentTime() const;
   std::shared_ptr<Node> getNodeAtAddress(int address);
   const std::vector<int> &getAllNodeAddresses() const;
 
-  void addPacketReceived(std::shared_ptr<Node> node);
-  void addPacketDropped(std::shared_ptr<Node> node);
+  void scheduleEvent(const Event &event);
+  void setup();
+  void run();
 
   void printReport() const;
 };

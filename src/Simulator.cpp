@@ -4,21 +4,11 @@
 #include <iostream>
 #include <memory>
 
-Simulator::Simulator() {
-  current_time = 0.0;
-  simulation_end_time = DEFAULT_SIMULATION_END;
-  while (!event_queue.empty()) {
-    event_queue.pop();
-  }
-}
+Simulator::Simulator()
+    : current_time(0.0), simulation_end_time(DEFAULT_SIMULATION_END) {}
 
-Simulator::Simulator(double end_time) {
-  current_time = 0.0;
-  simulation_end_time = end_time;
-  while (!event_queue.empty()) {
-    event_queue.pop();
-  }
-}
+Simulator::Simulator(double end_time)
+    : current_time(0.0), simulation_end_time(end_time) {}
 
 void Simulator::processEvent(const Event &event) {
   switch (event.event_type) {
@@ -32,28 +22,11 @@ void Simulator::processEvent(const Event &event) {
     handleTransmissionComplete(event);
     break;
   }
-
-  /*std::cout << "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;*/
-
-  //  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 void Simulator::handlePacketGeneration(const Event &event) {
   std::shared_ptr<Node> node = event.target_node;
-  switch (node->getAddress()) {
-  case 0:
-    node->generatePacket(1);
-    break;
-  case 1:
-    node->generatePacket(2);
-    break;
-  case 2:
-    node->generatePacket(3);
-    break;
-  case 3:
-    node->generatePacket(0);
-    break;
-  }
+  node->generatePacket();
 }
 
 void Simulator::handlePacketArrival(const Event &event) {
@@ -82,6 +55,36 @@ void Simulator::addLink(std::shared_ptr<Link> link) {
   all_links.push_back(link);
 }
 
+void Simulator::addPacketReceived(std::shared_ptr<Node> node) {
+  int addr = node->getAddress();
+  packets_received_by_node[addr]++;
+}
+
+void Simulator::addPacketDropped(std::shared_ptr<Node> node) {
+  int addr = node->getAddress();
+  packets_dropped_by_node[addr]++;
+}
+
+double Simulator::getCurrentTime() const { return current_time; }
+
+std::shared_ptr<Node> Simulator::getNodeAtAddress(int address) {
+  std::shared_ptr<Node> node = nullptr;
+  if (auto it = all_nodes.find(address); it != all_nodes.end()) {
+    node = it->second;
+  }
+  return node;
+}
+
+const std::vector<int> &Simulator::getAllNodeAddresses() const {
+  return all_node_addresses;
+}
+
+void Simulator::scheduleEvent(const Event &event) { event_queue.push(event); }
+
+/* void Simulator::setup(int choice) {
+
+}*/
+
 void Simulator::setup() {
   try {
     /* TODO
@@ -90,12 +93,13 @@ void Simulator::setup() {
      * Implement a simple protocol
      */
 
-    std::cout << "here we are in setup()" << std::endl;
+    /* Set up a four-node topology */
     std::shared_ptr<Node> node0 = std::make_shared<Node>(0, shared_from_this());
     std::shared_ptr<Node> node1 = std::make_shared<Node>(1, shared_from_this());
     std::shared_ptr<Node> node2 = std::make_shared<Node>(2, shared_from_this());
     std::shared_ptr<Node> node3 = std::make_shared<Node>(3, shared_from_this());
 
+    /* With three bidirectional links, six total */
     std::shared_ptr<Link> link01 =
         std::make_shared<Link>(node0, node1, 10, 40, shared_from_this());
     std::shared_ptr<Link> link10 =
@@ -109,16 +113,15 @@ void Simulator::setup() {
     std::shared_ptr<Link> link32 =
         std::make_shared<Link>(node3, node2, 10, 50, shared_from_this());
 
+    /* Add outgoing links to each node */
     node0->addOutgoingLink(link01);
-
     node1->addOutgoingLink(link10);
     node1->addOutgoingLink(link12);
-
     node2->addOutgoingLink(link21);
     node2->addOutgoingLink(link23);
-
     node3->addOutgoingLink(link32);
 
+    /* Populate routing table for each node */
     node0->setRoute(node1->getAddress(), link01);
     node0->setRoute(node2->getAddress(), link01);
     node0->setRoute(node3->getAddress(), link01);
@@ -135,6 +138,7 @@ void Simulator::setup() {
     node3->setRoute(node1->getAddress(), link32);
     node3->setRoute(node2->getAddress(), link32);
 
+    /* Add each node and link to master list */
     addNode(node0);
     addNode(node1);
     addNode(node2);
@@ -147,6 +151,7 @@ void Simulator::setup() {
     addLink(link23);
     addLink(link32);
 
+    /* Initialize packets received and dropped count */
     packets_received_by_node.insert({node0->getAddress(), 0});
     packets_received_by_node.insert({node1->getAddress(), 0});
     packets_received_by_node.insert({node2->getAddress(), 0});
@@ -157,6 +162,7 @@ void Simulator::setup() {
     packets_dropped_by_node.insert({node2->getAddress(), 0});
     packets_dropped_by_node.insert({node3->getAddress(), 0});
 
+    /* Kick off simulation */
     node0->generatePacket(node3->getAddress(), 0.00002);
     node1->generatePacket(node2->getAddress(), 0.00002);
     node2->generatePacket(node0->getAddress(), 0.00002);
@@ -176,22 +182,6 @@ void Simulator::run() {
   }
 }
 
-void Simulator::scheduleEvent(const Event &event) { event_queue.push(event); }
-
-double Simulator::getCurrentTime() const { return current_time; }
-
-std::shared_ptr<Node> Simulator::getNodeAtAddress(int address) {
-  std::shared_ptr<Node> node = nullptr;
-  if (auto it = all_nodes.find(address); it != all_nodes.end()) {
-    node = it->second;
-  }
-  return node;
-}
-
-const std::vector<int> &Simulator::getAllNodeAddresses() const {
-  return all_node_addresses;
-}
-
 void Simulator::printReport() const {
   std::cout << "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
   std::cout << "Summary" << std::endl;
@@ -207,14 +197,4 @@ void Simulator::printReport() const {
               << std::endl;
     std::cout << "--------------------------------------------" << std::endl;
   }
-}
-
-void Simulator::addPacketReceived(std::shared_ptr<Node> node) {
-  int addr = node->getAddress();
-  packets_received_by_node[addr]++;
-}
-
-void Simulator::addPacketDropped(std::shared_ptr<Node> node) {
-  int addr = node->getAddress();
-  packets_dropped_by_node[addr]++;
 }
