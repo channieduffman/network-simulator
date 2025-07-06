@@ -21,6 +21,9 @@ private:
   std::vector<std::shared_ptr<Link>> all_links;
 
   void processEvent(const Event &event);
+  void handlePacketGeneration(const Event &event);
+  void handlePacketArrival(const Event &event);
+  void handleTransmissionComplete(const Event &event);
 
 public:
   Simulator();
@@ -37,4 +40,6 @@ public:
   double getCurrentTime() const;
   std::shared_ptr<Node> getNodeAtAddress(int address);
   const std::vector<int> &getAllNodeAddresses() const;
+
+  void printReport() const;
 };

@@ -10,21 +10,36 @@
 class Simulator;
 class Link;
 
-class Node {
+class Node : public std::enable_shared_from_this<Node> {
 private:
-  double address;
+  int max_incoming_capacity;
+  int address;
 
-  std::queue<Packet> incoming;
-  std::queue<Packet> outgoing;
+  int packets_received;
+  int packets_dropped;
+
+  std::queue<std::shared_ptr<Packet>> incoming;
+  std::map<int, std::shared_ptr<Link>> outgoing_links;
 
   std::map<int, std::shared_ptr<Link>> routes;
 
   std::weak_ptr<Simulator> simulator;
 
-public:
-  Node();
-  Node(int address);
+  int getRandomIndex(int len);
 
+public:
+  Node(int address, std::shared_ptr<Simulator> sim, int capacity = 20);
+
+  void generatePacket(int target = -1, double interval = 0.2);
+  void receivePacket(std::shared_ptr<Packet> packet);
   void notifyLinkFree(std::shared_ptr<Link> free_link);
-  double getAddress() const;
+  void processQueuedPacket();
+
+  void setRoute(int node, std::shared_ptr<Link> link);
+  void addOutgoingLink(std::shared_ptr<Link> link);
+
+  int getAddress() const;
+  int getPacketsReceived() const;
+  int getPacketsDropped() const;
+  std::map<int, std::shared_ptr<Link>> getRoutes() const;
 };

@@ -1,9 +1,12 @@
 #include "Link.h"
 #include "Event.h"
+#include "Packet.h"
 #include "Simulator.h"
 
 #include <cassert>
+#include <iostream>
 #include <memory>
+#include <string>
 
 Link::Link(std::shared_ptr<Node> source, std::shared_ptr<Node> destination,
            double latency, double bandwidth, std::shared_ptr<Simulator> sim) {
@@ -13,6 +16,31 @@ Link::Link(std::shared_ptr<Node> source, std::shared_ptr<Node> destination,
   bandwidth_in_Mbps = bandwidth;
   simulator = sim;
   is_busy = false;
+}
+
+int Link::getSourceNode() const { return source_node->getAddress(); }
+
+int Link::getDestinationNode() const { return destination_node->getAddress(); }
+
+bool Link::isBusy() { return is_busy; }
+
+void Link::startTransmission(std::shared_ptr<Packet> packet) {
+  assert(packet != nullptr &&
+         "Link::startTransmission called with null packet!");
+
+  is_busy = true;
+
+  double transmission_delay = getTransmissionDelayInSeconds(packet);
+
+  if (auto sim = simulator.lock()) {
+    Event next_event(Event::EventType::TRANSMISSION_COMPLETE,
+                     sim->getCurrentTime() + transmission_delay, nullptr,
+                     shared_from_this(), packet);
+    sim->scheduleEvent(next_event);
+  } else {
+    throw std::runtime_error(
+        "error: Link::startTransmission(): simulator does not exist!");
+  }
 }
 
 void Link::completeTransmission(std::shared_ptr<Packet> packet) {
@@ -51,4 +79,9 @@ Link::getTransmissionDelayInSeconds(std::shared_ptr<Packet> packet) const {
 
 double Link::getPropagationDelayInSeconds() const {
   return latency_in_ms / 1000;
+}
+
+void Link::printLink() const {
+  std::cout << std::to_string(source_node->getAddress()) << " -> "
+            << std::to_string(destination_node->getAddress()) << std::endl;
 }

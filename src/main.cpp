@@ -3,6 +3,14 @@
 #include <iostream>
 
 int main() {
-  std::cout << "hello world" << std::endl;
+  std::shared_ptr<Simulator> sim;
+  try {
+    sim = std::make_shared<Simulator>(120);
+    sim->setup();
+    sim->run();
+    sim->printReport();
+  } catch (const std::exception &ex) {
+    std::cerr << "error: " << ex.what() << std::endl;
+  }
   return 0;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Link.h"
 #include "Node.h"
 #include "Packet.h"
 
@@ -26,5 +27,13 @@ public:
   double getTransmissionDelayInSeconds(std::shared_ptr<Packet> packet) const;
   double getPropagationDelayInSeconds() const;
 
+  bool isBusy();
+
+  int getSourceNode() const;
+  int getDestinationNode() const;
+
+  void startTransmission(std::shared_ptr<Packet> packet);
   void completeTransmission(std::shared_ptr<Packet> packet);
+
+  void printLink() const;
 };

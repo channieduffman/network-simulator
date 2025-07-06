@@ -17,4 +17,6 @@ public:
   int getDestinationAddress() const;
   double getSizeInBits() const;
   double getTimeCreatedInSeconds() const;
+
+  void printPacket() const;
 };
