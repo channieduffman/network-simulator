@@ -18,6 +18,8 @@ The current network topology is fixed during `Simulator::setup()` for the sake o
     - **Packets** are the individual points of data being passed through the network.
 4. Events
     - **Events** are the drivers of the simulation, triggering actions that schedule future events until the simulation end time is reached.
+5. Simulator
+    - The **Simulator** is the conductor of the application, setting up the topology, scheduling and processing events.
 
 ---
 
