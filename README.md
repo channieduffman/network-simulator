@@ -6,9 +6,9 @@ This uses a **Discrete Event Simulation** to model a simple network, gathering r
 
 ## TODO
 
-[ ] Tests
-[ ] Refactoring
-[ ] Configurable topology
+- [ ] Tests
+- [ ] Refactoring
+- [ ] Configurable topology
 
 ---
 
