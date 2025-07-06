@@ -4,6 +4,14 @@ This uses a **Discrete Event Simulation** to model a simple network, gathering r
 
 ---
 
+## TODO
+
+[ ] Tests
+[ ] Refactoring
+[ ] Configurable topology
+
+---
+
 ## Topology
 
 The current network topology is fixed during `Simulator::setup()` for the sake of fleshing out the design of the system. 
