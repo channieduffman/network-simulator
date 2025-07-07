@@ -21,6 +21,7 @@ private:
   std::vector<int> all_node_addresses;
   std::vector<std::shared_ptr<Link>> all_links;
 
+  std::map<int, int> packets_generated_by_node;
   std::map<int, int> packets_received_by_node;
   std::map<int, int> packets_dropped_by_node;
 
@@ -35,6 +36,7 @@ public:
 
   void addNode(std::shared_ptr<Node> node);
   void addLink(std::shared_ptr<Link> link);
+  void addPacketGenerated(std::shared_ptr<Node> node);
   void addPacketReceived(std::shared_ptr<Node> node);
   void addPacketDropped(std::shared_ptr<Node> node);
 

@@ -26,7 +26,7 @@ void Simulator::processEvent(const Event &event) {
 
 void Simulator::handlePacketGeneration(const Event &event) {
   std::shared_ptr<Node> node = event.target_node;
-  node->generatePacket();
+  node->generatePacket(node->getInterval());
 }
 
 void Simulator::handlePacketArrival(const Event &event) {
@@ -53,6 +53,11 @@ void Simulator::addNode(std::shared_ptr<Node> node) {
 void Simulator::addLink(std::shared_ptr<Link> link) {
   assert(link != nullptr && "error: Simulator::addLink(): link is null!");
   all_links.push_back(link);
+}
+
+void Simulator::addPacketGenerated(std::shared_ptr<Node> node) {
+  int addr = node->getAddress();
+  packets_generated_by_node[addr]++;
 }
 
 void Simulator::addPacketReceived(std::shared_ptr<Node> node) {
@@ -94,10 +99,14 @@ void Simulator::setup() {
      */
 
     /* Set up a four-node topology */
-    std::shared_ptr<Node> node0 = std::make_shared<Node>(0, shared_from_this());
-    std::shared_ptr<Node> node1 = std::make_shared<Node>(1, shared_from_this());
-    std::shared_ptr<Node> node2 = std::make_shared<Node>(2, shared_from_this());
-    std::shared_ptr<Node> node3 = std::make_shared<Node>(3, shared_from_this());
+    std::shared_ptr<Node> node0 =
+        std::make_shared<Node>(0, shared_from_this(), 2);
+    std::shared_ptr<Node> node1 =
+        std::make_shared<Node>(1, shared_from_this(), 2);
+    std::shared_ptr<Node> node2 =
+        std::make_shared<Node>(2, shared_from_this(), 2);
+    std::shared_ptr<Node> node3 =
+        std::make_shared<Node>(3, shared_from_this(), 2);
 
     /* With three bidirectional links, six total */
     std::shared_ptr<Link> link01 =
@@ -163,11 +172,12 @@ void Simulator::setup() {
     packets_dropped_by_node.insert({node3->getAddress(), 0});
 
     /* Kick off simulation */
-    node0->generatePacket(node3->getAddress(), 0.00002);
-    node1->generatePacket(node2->getAddress(), 0.00002);
-    node2->generatePacket(node0->getAddress(), 0.00002);
-    node3->generatePacket(node1->getAddress(), 0.00002);
+    node0->generatePacket(0.1);
+    node1->generatePacket(0.2);
+    node2->generatePacket(0.5);
+    node3->generatePacket(0.9);
 
+    std::cout << "finished setting up" << std::endl;
   } catch (const std::exception &e) {
     std::cout << "error: " << e.what() << std::endl;
   }
@@ -195,6 +205,9 @@ void Simulator::printReport() const {
     std::cout << std::setw(20) << std::left
               << "Packets Dropped:" << packets_dropped_by_node.at(node)
               << std::endl;
-    std::cout << "--------------------------------------------" << std::endl;
+    std::cout << std::setw(20) << std::left
+              << "Packets Generated:" << packets_generated_by_node.at(node)
+              << std::endl;
+    std::cout << "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
   }
 }
